@@ -77,35 +77,32 @@
           
               form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                status.textContent = 'Submitting...';
+                status && (status.textContent = 'Submitting...');
           
                 try {
                   const res = await fetch(form.action, {
                     method: 'POST',
                     body: new FormData(form),
-                    headers: { 'Accept': 'application/json' } // ask Formspree for JSON (prevents redirect)
+                    headers: { 'Accept': 'application/json' } // stay on-page
                   });
           
                   if (res.ok) {
                     form.reset();
-                    status.textContent = 'Thanks! You’re on the list.';
-          
-                    // Optional: GA4 conversion event if GA is already loaded elsewhere
+                    status && (status.textContent = 'Thanks! You’re on the list.');
                     if (typeof gtag === 'function') {
-                      try {
-                        const id = form.action.split('/').pop();
-                        gtag('event', 'generate_lead', { method: 'formspree', form_id: id });
-                      } catch (_) {}
+                      const id = form.action.split('/').pop();
+                      gtag('event', 'generate_lead', { method: 'formspree', form_id: id });
                     }
                   } else {
-                    status.textContent = 'Hmm, something went wrong. Please try again.';
+                    status && (status.textContent = 'Hmm, something went wrong. Please try again.');
                   }
                 } catch {
-                  status.textContent = 'Network error—please try again.';
+                  status && (status.textContent = 'Network error—please try again.');
                 }
               });
             })();
           </script>
+
           
           <!-- No-JS fallback -->
           <noscript>
@@ -126,6 +123,7 @@
   <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
 </body>
 </html>
+
 
 
 
