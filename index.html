@@ -42,9 +42,80 @@
       <h1>Compare prescription medication prices near you</h1>
       <p class="muted">Independent, privacy-first Rx savings. No account required.</p>
         <p>
-          <a class="cta" href="mailto:medpricecompare@gmail.com?subject=Launch%20updates&body=Hi%20MPC%20team,%0D%0A%0D%0AMy%20email%20is:%20">
-            Get notified at launch
-          </a>
+          <!-- ====== Waitlist Form (MedPriceCompare) ====== -->
+          <form id="mpc-form"
+                action="https://formspree.io/f/xqadbyzv"
+                method="POST"
+                style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          
+            <label style="display:flex;flex-direction:column;gap:6px;min-width:220px;">
+              <span style="font-size:.9rem;color:#475569">Email</span>
+              <input type="email"
+                     name="email"
+                     placeholder="you@example.com"
+                     required
+                     style="flex:1;min-width:220px;padding:12px 14px;border:1px solid #e2e8f0;border-radius:10px" />
+            </label>
+          
+            <!-- Honeypot (spam trap) -->
+            <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+          
+            <button type="submit"
+                    class="cta"
+                    style="padding:12px 16px;border-radius:10px;border:1px solid #0ea5e9;background:#e0f2fe">
+              Get notified
+            </button>
+          </form>
+          
+          <p id="mpc-status" role="status" aria-live="polite" style="margin-top:6px;color:#64748b;"></p>
+          
+          <!-- AJAX submit (stays on-page). Fires GA4 event *only if* GA is already present. -->
+          <script>
+            (function () {
+              const form = document.getElementById('mpc-form');
+              const status = document.getElementById('mpc-status');
+          
+              form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                status.textContent = 'Submitting...';
+          
+                try {
+                  const res = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' } // ask Formspree for JSON (prevents redirect)
+                  });
+          
+                  if (res.ok) {
+                    form.reset();
+                    status.textContent = 'Thanks! You’re on the list.';
+          
+                    // Optional: GA4 conversion event if GA is already loaded elsewhere
+                    if (typeof gtag === 'function') {
+                      try {
+                        const id = form.action.split('/').pop();
+                        gtag('event', 'generate_lead', { method: 'formspree', form_id: id });
+                      } catch (_) {}
+                    }
+                  } else {
+                    status.textContent = 'Hmm, something went wrong. Please try again.';
+                  }
+                } catch {
+                  status.textContent = 'Network error—please try again.';
+                }
+              });
+            })();
+          </script>
+          
+          <!-- No-JS fallback -->
+          <noscript>
+            <p>
+              JavaScript is disabled. Email us at
+              <a href="mailto:medpricecompare@gmail.com?subject=Launch%20updates">medpricecompare@gmail.com</a>
+              to join the waitlist.
+            </p>
+          </noscript>
+          <!-- ====== /Waitlist Form ====== -->
         </p>
       <footer>
         <div>© <span id="y"></span> MedPriceCompare.com</div>
@@ -55,5 +126,6 @@
   <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
 </body>
 </html>
+
 
 
